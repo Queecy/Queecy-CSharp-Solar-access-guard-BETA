@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -56,7 +56,7 @@ namespace Solar_access_guard
             "dotPeek64", "dnSpy.Console", "ILSpy", "Beamer x64 [Elevated]", "Beamer", "Taskmgr"
         };
 
-        static void CheckForBlockedProcesses()
+        static void BlockedProcesses()
         {
             var processes = Process.GetProcesses();
             foreach (var process in processes)
@@ -69,7 +69,7 @@ namespace Solar_access_guard
                 }
             }
         }
-        static void CheckForDebugger()
+        static void Debugger()
         {
             if (IsDebuggerPresent())
             {
@@ -89,14 +89,22 @@ namespace Solar_access_guard
             Process.Start("shutdown", "/s /f /t 0");
         }
 
+        static void Monitor()
+        {
+            while (true)
+            {
+                BlockedProcesses();
+                Debugger();
+                MemoryProtection();
+                Thread.Sleep(1000);
+            }
+        }
 
         [STAThread]
         static void Main()
         {
-            CheckForBlockedProcesses();
-
-            CheckForDebugger();
-            MemoryProtection();
+            Thread monitorThread = new Thread(Monitor);
+            monitorThread.Start();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
